@@ -3,9 +3,9 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
+#include <netdb.h>
 
 #include <sys/socket.h>
-#include <netdb.h>
 
 #define die(fmt, args...) \
 do { \
@@ -65,21 +65,6 @@ int main(int argc, char *argv[])
 	port = atoi(argv[optind + 1]);
 	if (port < 0 || port > 65535)
 		die("Invalid port: %s\n", argv[optind + 1]);
-
-	sock = socket(PF_INET, SOCK_DGRAM, 0);
-	if (sock < 0)
-		fail("create the sock");
-	memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	memcpy(&addr.sin_addr, he->h_addr, sizeof(addr.sin_addr));
-	addr.sin_port = htons(port);
-
-	if (no_check) {
-		int ok = 1;
-
-		if (setsockopt(sock, SOL_SOCKET, SO_NO_CHECK, &ok, sizeof(ok)))
-			fail("disable UDP checksum");
-	}
 	if (optind + 3 == argc) {
 		content = strdup(argv[optind + 2]);
 		if (!content)
@@ -108,6 +93,21 @@ int main(int argc, char *argv[])
 		}
 		if (!content)
 			die("No content");
+	}
+
+	sock = socket(PF_INET, SOCK_DGRAM, 0);
+	if (sock < 0)
+		fail("create the sock");
+	memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	memcpy(&addr.sin_addr, he->h_addr, sizeof(addr.sin_addr));
+	addr.sin_port = htons(port);
+
+	if (no_check) {
+		int ok = 1;
+
+		if (setsockopt(sock, SOL_SOCKET, SO_NO_CHECK, &ok, sizeof(ok)))
+			fail("disable UDP checksum");
 	}
 
 	if (sendto(sock, content, content_len, 0,
