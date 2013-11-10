@@ -111,6 +111,7 @@ static unsigned int compress_tg(struct sk_buff *skb,
 	struct udphdr *udph;
 	unsigned int len;
 	int retval;
+	__be16 new_len;
 
 	if (skb_linearize_cow(skb))
 		goto err;
@@ -143,9 +144,9 @@ static unsigned int compress_tg(struct sk_buff *skb,
 		skb->csum_offset = offsetof(struct udphdr, check);
 	}
 
-	iph->tot_len = htons(skb->len);
-	iph->check = 0;
-	iph->check = ip_fast_csum(iph, iph->ihl);
+	new_len = htons(skb->len);
+	csum_replace2(&iph->check, iph->tot_len, new_len);
+	iph->tot_len = new_len;
 
 	return XT_CONTINUE;
 err:
