@@ -342,7 +342,7 @@ static unsigned int encrypt_tg(struct sk_buff *skb,
 	unsigned int len;
 	int retval;
 
-	iph = skb_header_pointer(skb, 0, sizeof(_iph), &iph);
+	iph = skb_header_pointer(skb, 0, sizeof(_iph), &_iph);
 	if (!iph)
 		goto err;
 	/**
