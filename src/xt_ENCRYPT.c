@@ -364,6 +364,7 @@ static unsigned int encrypt_tg(struct sk_buff *skb,
 
 	if (!skb_make_writable(skb, len))
 		goto err;
+	iph = ip_hdr(skb);
 	udph = (struct udphdr *)(skb->data + par->thoff);
 	udph->len = htons(skb->len - par->thoff);
 	if (udph->check) {
@@ -374,7 +375,6 @@ static unsigned int encrypt_tg(struct sk_buff *skb,
 		skb->csum_offset = offsetof(struct udphdr, check);
 	}
 
-	iph = ip_hdr(skb);
 	iph->tot_len = htons(skb->len);
 	iph->check = 0;
 	iph->check = ip_fast_csum(iph, iph->ihl);
