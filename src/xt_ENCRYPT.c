@@ -110,11 +110,9 @@ static void ____xt_encrypt_update_salt(const struct xt_encrypt_info *info,
 	unsigned int key_len = crypto_blkcipher_alg(priv->tfm)->max_keysize;
 	u8 key[key_len];
 
-	if (md5_gen_key_iv(&priv->hd, priv->passphrase, priv->passphrase_len,
-			   priv->salt, key, key_len, priv->iv, priv->iv_size))
-		panic("Oops"); /* TODO */
-	if (crypto_blkcipher_setkey(priv->tfm, key, key_len))
-		panic("Oops"); /* TODO */
+	BUG_ON(md5_gen_key_iv(&priv->hd, priv->passphrase, priv->passphrase_len,
+			   priv->salt, key, key_len, priv->iv, priv->iv_size));
+	BUG_ON(crypto_blkcipher_setkey(priv->tfm, key, key_len));
 }
 
 static void __xt_encrypt_update_salt(unsigned long __info)
