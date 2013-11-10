@@ -362,7 +362,7 @@ static unsigned int encrypt_tg(struct sk_buff *skb,
 	if (retval)
 		goto err;
 
-	if (!skb_make_writable(skb, iph->ihl * 4 + sizeof(*udph)))
+	if (!skb_make_writable(skb, len))
 		goto err;
 	udph = (struct udphdr *)(skb->data + par->thoff);
 	udph->len = htons(skb->len - par->thoff);
