@@ -93,9 +93,9 @@ static void XOR_parse(struct xt_option_call *cb)
 			    !isxdigit(cb->arg[i * 2 + 1])) {
 				xtables_error(PARAMETER_PROBLEM,
 						"Invalid hex char");
-				xor->key[i] = (hex2bin(cb->arg[i * 2]) << 4) |
-						hex2bin(cb->arg[i * 2 + 1]);
 			}
+			xor->key[i] = (hex2bin(cb->arg[i * 2]) << 4) |
+				hex2bin(cb->arg[i * 2 + 1]);
 		}
 		xor->key_len = len;
 		break;
