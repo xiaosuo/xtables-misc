@@ -29,6 +29,9 @@ enum {
 	O_ENCRYPT_PASSPHRASE,
 	O_ENCRYPT_PERTURB_TIME,
 	O_ENCRYPT_PERTURB_NUMBER,
+	F_ENCRYPT_DECRYPT	  = 1 << O_ENCRYPT_DECRYPT,
+	F_ENCRYPT_PERTURB_TIME	  = 1 << O_ENCRYPT_PERTURB_TIME,
+	F_ENCRYPT_PERTURB_NUMBER  = 1 << O_ENCRYPT_PERTURB_NUMBER,
 };
 
 #define s struct xt_encrypt_info
@@ -78,6 +81,23 @@ static void ENCRYPT_parse(struct xt_option_call *cb)
 	case O_ENCRYPT_PASSPHRASE:
 		strcpy(encrypt->passphrase, cb->arg);
 		break;
+	}
+}
+
+static void ENCRYPT_check(struct xt_fcheck_call *cb)
+{
+	if (cb->xflags & F_ENCRYPT_DECRYPT) {
+		if (cb->xflags & F_ENCRYPT_PERTURB_TIME) {
+			xtables_error(PARAMETER_PROBLEM,
+				      "ENCRYPT target: `--encrypt-perturb-time'"
+				      " is only valid for encryption");
+		}
+		if (cb->xflags & F_ENCRYPT_PERTURB_NUMBER) {
+			xtables_error(PARAMETER_PROBLEM,
+				      "ENCRYPT target: "
+				      "`--encrypt-perturb-number' "
+				      "is only valid for encryption");
+		}
 	}
 }
 
@@ -147,6 +167,7 @@ static struct xtables_target encrypt_tg_reg = {
 	.print		= ENCRYPT_print,
 	.save		= ENCRYPT_save,
 	.x6_parse	= ENCRYPT_parse,
+	.x6_fcheck	= ENCRYPT_check,
 	.x6_options	= ENCRYPT_opts,
 };
 
