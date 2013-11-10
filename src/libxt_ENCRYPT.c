@@ -24,7 +24,7 @@
 #include <string.h>
 
 enum {
-	O_ENCRYPT_DEENCRYPT = 0,
+	O_ENCRYPT_DECRYPT = 0,
 	O_ENCRYPT_ALGORITHM,
 	O_ENCRYPT_PASSPHRASE,
 	O_ENCRYPT_PERTURB_TIME,
@@ -33,7 +33,7 @@ enum {
 
 #define s struct xt_encrypt_info
 static const struct xt_option_entry ENCRYPT_opts[] = {
-	{.name = "encrypt-decrypt", .id = O_ENCRYPT_DEENCRYPT,
+	{.name = "encrypt-decrypt", .id = O_ENCRYPT_DECRYPT,
 	 .type = XTTYPE_NONE},
 	{.name = "encrypt-algorithm", .id = O_ENCRYPT_ALGORITHM,
 	 .flags = XTOPT_MAND, .type = XTTYPE_STRING, .min = 1,
@@ -69,7 +69,7 @@ static void ENCRYPT_parse(struct xt_option_call *cb)
 
 	xtables_option_parse(cb);
 	switch (cb->entry->id) {
-	case O_ENCRYPT_DEENCRYPT:
+	case O_ENCRYPT_DECRYPT:
 		encrypt->decrypt = 1;
 		break;
 	case O_ENCRYPT_ALGORITHM:
