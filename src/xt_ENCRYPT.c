@@ -156,8 +156,8 @@ static struct xt_encrypt_priv *xt_encrypt_alloc_priv(
 		goto err2;
 	}
 	if (crypto_blkcipher_blocksize(priv->tfm) > 255) {
-		pr_warn("The block size of %s is %u > 255\n", info->alg_name,
-			crypto_blkcipher_blocksize(priv->tfm));
+		pr_err("The block size of %s is %u > 255\n", info->alg_name,
+				crypto_blkcipher_blocksize(priv->tfm));
 		error = ERR_PTR(-EINVAL);
 		goto err3;
 	}
