@@ -228,18 +228,19 @@ static struct xt_target compress_tg_reg __read_mostly = {
 
 static int __init compress_tg_init(void)
 {
+	int retval;
+
 	nf_defrag_ipv4_enable();
 	compress_scratches = compress_alloc_scratches();
 	if (!compress_scratches)
-		goto err;
-	if (xt_register_target(&compress_tg_reg))
-		goto err2;
+		return -ENOMEM;
+	retval = xt_register_target(&compress_tg_reg);
+	if (retval) {
+		compress_free_scratches(compress_scratches);
+		return retval;
+	}
 
 	return 0;
-err2:
-	compress_free_scratches(compress_scratches);
-err:
-	return -ENOMEM;
 }
 
 static void __exit compress_tg_exit(void)
