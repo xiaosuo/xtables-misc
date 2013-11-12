@@ -1,3 +1,4 @@
 obj-m := xt_COMPRESS.o
 obj-m += xt_ENCRYPT.o
 obj-m += xt_XOR.o
+obj-m += xt_sip.o
