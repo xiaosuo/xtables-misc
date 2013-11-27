@@ -179,6 +179,23 @@ static void compress_tg_destroy(const struct xt_tgdtor_param *par)
 	crypto_free_comp(compress_info->tfm);
 }
 
+static void compress_free_scratches(void * __percpu *scratches)
+{
+	int i;
+
+	for_each_possible_cpu(i) {
+		void *scratch = *per_cpu_ptr(scratches, i);
+
+		if (is_vmalloc_addr(scratch)) {
+			vfree(scratch);
+		} else {
+			free_pages((unsigned long)scratch,
+					get_order(COMPRESS_SCRATCH_SIZE));
+		}
+	}
+	free_percpu(scratches);
+}
+
 static void * __percpu *compress_alloc_scratches(void)
 {
 	void * __percpu *scratches;
@@ -189,29 +206,27 @@ static void * __percpu *compress_alloc_scratches(void)
 		goto err;
 	for_each_possible_cpu(i) {
 		void *scratch;
+		struct page *page;
 
-		scratch = vmalloc_node(COMPRESS_SCRATCH_SIZE, cpu_to_node(i));
-		if (!scratch)
-			goto err2;
+		page = alloc_pages_node(cpu_to_node(i),
+				GFP_KERNEL | __GFP_NOWARN,
+				get_order(COMPRESS_SCRATCH_SIZE));
+		if (page) {
+			scratch = page_address(page);
+		} else {
+			scratch = vmalloc_node(COMPRESS_SCRATCH_SIZE,
+					cpu_to_node(i));
+			if (!scratch)
+				goto err2;
+		}
 		*per_cpu_ptr(scratches, i) = scratch;
 	}
 
 	return scratches;
 err2:
-	for_each_possible_cpu(i)
-		vfree(*per_cpu_ptr(scratches, i));
-	free_percpu(scratches);
+	compress_free_scratches(scratches);
 err:
 	return NULL;
-}
-
-static void compress_free_scratches(void * __percpu *scratches)
-{
-	int i;
-
-	for_each_possible_cpu(i)
-		vfree(*per_cpu_ptr(scratches, i));
-	free_percpu(scratches);
 }
 
 static struct xt_target compress_tg_reg __read_mostly = {
